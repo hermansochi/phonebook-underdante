@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+    mainpage:
+        image: ${REGISTRY}/phonebook-underdante:${IMAGE_TAG}
+        environment:
+            REACT_APP_API_URL: https://api.herman.team/api/v1/
+        networks:
+            - traefik-public
+        deploy:
+            labels:
+                - traefik.enable=true
+                - traefik.docker.network=traefik-public
+                - traefik.constraint-label=traefik-public
+                - traefik.http.routers.phonebook-underdante-http.rule=Host(`underdante.pb.herman.team`)
+                - traefik.http.routers.phonebook-underdante-http.entrypoints=http
+                - traefik.http.routers.phonebook-underdante-http.middlewares=https-redirect
+                - traefik.http.routers.phonebook-underdante-https.rule=Host(`underdante.pb.herman.team`)
+                - traefik.http.routers.phonebook-underdante-https.entrypoints=https
+                - traefik.http.routers.phonebook-underdante-https.tls=true
+                - traefik.http.routers.phonebook-underdante-https.tls.certresolver=le
+                - traefik.http.services.phonebook-underdante.loadbalancer.server.port=80
+            placement:
+                    constraints:
+                        - node.labels.phonebook-underdante.manager == true
+
+networks:
+    traefik-public:
+        external: true
